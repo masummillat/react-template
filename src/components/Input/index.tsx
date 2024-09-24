@@ -7,15 +7,27 @@ interface InputProps extends ComponentPropsWithoutRef<"input"> {
   required?: boolean;
   prefixIcon?: ReactNode;
   postfixIcon?: ReactNode;
+  hideError?: boolean;
+  wrapperClassName?: string;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
   (
-    { label, error, required, prefixIcon, postfixIcon, className, ...props },
+    {
+      label,
+      error,
+      required,
+      prefixIcon,
+      postfixIcon,
+      hideError = false,
+      wrapperClassName,
+      className,
+      ...props
+    },
     ref
   ) => {
     return (
-      <div className="w-full max-w-sm mb-1">
+      <div className={clsx([`w-full mb-1`])}>
         {label && (
           <label
             className="block text-sm font-medium text-gray-700"
@@ -26,10 +38,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           </label>
         )}
         <div
-          className={clsx(
+          className={clsx([
             "relative  border rounded-lg border-gray-400 w-full flex gap-1 focus-within:border-gray-500 focus-within:transition-all focus-within:duration-300 focus-within:ease-in-out",
-            error && "border-red-500"
-          )}
+            error && "border-red-500",
+            wrapperClassName,
+          ])}
         >
           {prefixIcon && (
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -38,11 +51,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
           <input
             ref={ref}
-            className={clsx(
-              "flex-1 outline-none border-none bg-transparent",
-
-              className
-            )}
+            className={clsx([
+              "flex-1 outline-none border-none bg-transparent dark:placeholder:text-white",
+              prefixIcon && "pl-10",
+              className,
+            ])}
             {...props}
           />
           {postfixIcon && (
@@ -51,7 +64,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             </div>
           )}
         </div>
-        <p className="text-red-500 text-sm">{error}</p>
+        {!hideError && <p className="text-red-500 text-sm h-4">{error}</p>}
       </div>
     );
   }

@@ -1,13 +1,5 @@
-import ThemeSwitcher from "@components/ThemeSwitcher";
-import React from "react";
-
-const Dashboard: React.FC = () => {
-  return (
-    <div>
-      <h1 className="text-3xl font-bold">Dashboard</h1>
-      <ThemeSwitcher />
-    </div>
-  );
+const Dashboard = () => {
+  return <main className="animate-fadeIn">Dashboard</main>;
 };
 
 export default Dashboard;

@@ -1,10 +1,10 @@
-import { useAuth0 } from "@auth0/auth0-react";
 import Input from "@components/Input";
 import clsx from "clsx";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { webAuth } from "@libs/webAuth";
 
 interface ICustomSignupLoginFormProps {
   show: boolean;
@@ -13,13 +13,13 @@ interface ICustomSignupLoginFormProps {
 type InputType = {
   email: string;
   password: string;
-  name: string;
+  username: string;
 };
 
 const schema = yup
   .object()
   .shape({
-    name: yup.string().required("Name is required"),
+    username: yup.string().required("Username is required"),
     email: yup
       .string()
       .email("Invalid email format")
@@ -31,7 +31,6 @@ const schema = yup
 const CustomSignupLoginForm: React.FC<ICustomSignupLoginFormProps> = ({
   show,
 }) => {
-  const { loginWithRedirect } = useAuth0();
   const {
     handleSubmit,
     register,
@@ -40,21 +39,27 @@ const CustomSignupLoginForm: React.FC<ICustomSignupLoginFormProps> = ({
     defaultValues: {
       email: "",
       password: "",
-      name: "",
+      username: "",
     },
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = async (values) => {
+  const onSubmit = async (values: InputType) => {
     try {
-      await loginWithRedirect({
-        username: values.email,
-        password: values.password,
-        name: name,
-        authorizationParams: {
-          screen_hint: "signup",
+      webAuth.signup(
+        {
+          connection: "Username-Password-Authentication",
+          email: values.email,
+          password: values.password,
+          username: values.username,
         },
-      });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        function (err: any) {
+          console.log(err);
+          if (err) return alert("Something went wrong: " + err?.message);
+          return alert("success signup without login!");
+        }
+      );
     } catch (error) {
       //   setError("Signup failed. Please try again.");
       console.error("Signup error:", error);
@@ -62,32 +67,29 @@ const CustomSignupLoginForm: React.FC<ICustomSignupLoginFormProps> = ({
   };
   console.log(show);
   return (
-    <div className={clsx([`w-full `])}>
+    <div className={clsx([`w-full `, show ? " animate-fadeIn" : "hidden"])}>
       <div className="inline-flex items-center justify-center w-full">
         <hr className="w-full h-px my-8 bg-[#CCD0D0] border-0 dark:bg-gray-700" />
         <span className="absolute px-3 font-medium text-gray-900 -translate-x-1/2 bg-lightBackground left-1/2 dark:text-white dark:bg-darkBackground">
           Sign Up with Email
         </span>
       </div>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="flex w-full flex-col gap-2"
-      >
+      <form onSubmit={handleSubmit(onSubmit)} className="flex w-full flex-col">
         <Input
-          label="Name"
+          label="Userame"
           className="border p-2 rounded"
           type="text"
-          id="name"
-          {...register("name")}
+          placeholder="Jhon Doe"
+          {...register("username")}
           required
-          error={errors["name"]?.message}
+          error={errors["username"]?.message}
         />
 
         <Input
           label="Email"
           className="border p-2 rounded"
           type="email"
-          id="email"
+          placeholder="john.doe@example.com"
           {...register("email")}
           required
           error={errors["email"]?.message}
@@ -97,7 +99,7 @@ const CustomSignupLoginForm: React.FC<ICustomSignupLoginFormProps> = ({
           label="Password"
           className="border p-2 rounded"
           type="password"
-          id="password"
+          placeholder="********"
           required
           {...register("password")}
           error={errors["password"]?.message}
