@@ -1,39 +1,97 @@
-name: Deploy React App to AWS S3 and CloudFront
+name: Deploy React App
 
 on:
   push:
     branches:
-      - main
+      - main      # Production branch
+      - stage   # Staging branch
+      - dev       # Development branch
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      # Checkout the code
+      - name: Checkout code
         uses: actions/checkout@v2
 
+      # Set up Node.js environment
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      - name: Install Dependencies
-        run: npm install
+      # Install dependencies
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Build
-        run: npm run build
-
-      - name: Deploy to S3
+      # Configure AWS credentials for each environment based on the branch
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-2
+        if: github.ref == 'refs/heads/main'
 
-      - name: Sync S3
-        run: aws s3 sync dist/ s3://millat-react-spa-template --delete
+      - name: Configure AWS credentials (Staging)
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+        if: github.ref == 'refs/heads/stage'
 
-      - name: Invalidate CloudFront
+      - name: Configure AWS credentials (Development)
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+        if: github.ref == 'refs/heads/dev'
+
+      # Build the React app
+      - name: Build React app for production
+        run: npm run build -- --mode production
+        if: github.ref == 'refs/heads/main'
+
+      - name: Build React app for staging
+        run: npm run build -- --mode staging
+        if: github.ref == 'refs/heads/stage'
+
+      - name: Build React app for development
+        run: npm run build -- --mode development
+        if: github.ref == 'refs/heads/dev'
+
+      # Deploy to S3 based on the environment
+      - name: Deploy to S3 (Production)
         run: |
-          aws cloudfront create-invalidation --distribution-id E24QJA2C2VEJXC --paths "/*"
+          aws s3 sync dist/ s3://millat-react-spa-production --delete
+        if: github.ref == 'refs/heads/main'
+
+      - name: Deploy to S3 (Staging)
+        run: |
+          aws s3 sync dist/ s3://millat-react-spa-staging --delete
+        if: github.ref == 'refs/heads/stage'
+
+      - name: Deploy to S3 (Development)
+        run: |
+          aws s3 sync dist/ s3://millat-react-spa-development --delete
+        if: github.ref == 'refs/heads/dev'
+
+      # Invalidate CloudFront cache
+      - name: Invalidate CloudFront cache (Production)
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_PRODUCTION }} --paths "/*"
+        if: github.ref == 'refs/heads/main'
+
+      - name: Invalidate CloudFront cache (Staging)
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_STAGING }} --paths "/*"
+        if: github.ref == 'refs/heads/stage'
+
+      - name: Invalidate CloudFront cache (Development)
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_DEVELOPMENT }} --paths "/*"
+        if: github.ref == 'refs/heads/dev'
