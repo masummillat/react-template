@@ -12,9 +12,8 @@ const TourBody: React.FC<TourBodyProps> = ({
   setCurrentStep,
   currentStep,
 }) => {
-  console.log(currentStep);
   return (
-    <div className="dark:bg-cardBackground-dark dark:text-white p-5 rounded-lg">
+    <div className="bg-white dark:bg-cardBackground-dark dark:text-white p-5 rounded-lg">
       <h4 className="text-lg font-semibold mb-2 text-[#111827] dark:text-white">
         {title}
       </h4>
