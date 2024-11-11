@@ -27,3 +27,7 @@ body {
   font-family: Inter, sans-serif;
   height: 100dvh;
 }
+
+* {
+  box-sizing: border-box;
+}

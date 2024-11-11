@@ -19,7 +19,6 @@ const Auth0ProviderWithHistory = ({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onRedirectCallback = (appState: any) => {
-    console.log("appState", appState);
     navigate(appState?.returnTo || window.location.pathname);
   };
 

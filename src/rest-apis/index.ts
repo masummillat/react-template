@@ -7,4 +7,4 @@ const fetchProfile = async (): Promise<any> => {
     return authClient.then(({get})=>get('/auth/me'))
 }
 
-export const  useFetchProfile = () => useQuery({ queryKey: ['me'], queryFn: fetchProfile, refetchOnWindowFocus: false }, )
+export const  useFetchProfile = (p0: { enabled: boolean; }) => useQuery({ queryKey: ['me'], queryFn: fetchProfile, refetchOnWindowFocus: false, enabled: p0.enabled }, )

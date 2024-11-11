@@ -9,6 +9,7 @@ interface InputProps extends ComponentPropsWithoutRef<"input"> {
   postfixIcon?: ReactNode;
   hideError?: boolean;
   wrapperClassName?: string;
+  containerClassName?: string;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -21,16 +22,17 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       postfixIcon,
       hideError = false,
       wrapperClassName,
+      containerClassName,
       className,
       ...props
     },
     ref
   ) => {
     return (
-      <div className={clsx([`w-full mb-1`])}>
+      <div className={clsx([`w-full mb-1`, containerClassName])}>
         {label && (
           <label
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium mb-1"
             htmlFor={props.id || props.name}
           >
             {label}
@@ -39,7 +41,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         )}
         <div
           className={clsx([
-            "relative  border rounded-lg border-gray-400 w-full flex gap-1 focus-within:border-gray-500 focus-within:transition-all focus-within:duration-300 focus-within:ease-in-out",
+            "relative  border rounded-lg border-border-light dark:border-border-dark w-full flex gap-1 focus-within:border-gray-500 focus-within:transition-all focus-within:duration-300 focus-within:ease-in-out",
             error && "border-red-500",
             wrapperClassName,
           ])}
@@ -52,8 +54,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             className={clsx([
-              "flex-1 outline-none border-none bg-transparent dark:placeholder:text-white",
-              prefixIcon && "pl-10",
+              "flex-1 outline-none border-none text-text-subbed dark:text-text-darkSubbed bg-transparent dark:placeholder:text-white pl-3 py-3",
+              prefixIcon && "!pl-10",
               className,
             ])}
             {...props}
